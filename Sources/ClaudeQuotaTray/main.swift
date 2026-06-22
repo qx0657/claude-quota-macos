@@ -4,7 +4,7 @@ import CryptoKit
 import Foundation
 import Security
 
-private let appVersion = "0.1.0"
+private let appVersion = "0.1.1"
 
 private let app = NSApplication.shared
 private let delegate = AppDelegate()
@@ -50,7 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setIcon(nil, .idle)
         rebuildMenu()
         scheduleTimer()
-        Task { await refreshNow() }
+        Task { @MainActor in await refreshNow() }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -63,9 +63,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func timerFired() {
-        Task { await refreshNow() }
+        Task { @MainActor in await refreshNow() }
     }
 
+    @MainActor
     private func refreshNow() async {
         if isFetching {
             return
@@ -124,7 +125,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
         menu.addItem(item("立即刷新") { [weak self] in
-            Task { await self?.refreshNow() }
+            Task { @MainActor in await self?.refreshNow() }
         })
         menu.addItem(sourceModeMenu())
         menu.addItem(refreshIntervalMenu())
@@ -214,7 +215,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         config.sourceMode = mode
         try? configStore.write(config)
         rebuildMenu()
-        Task { await refreshNow() }
+        Task { @MainActor in await refreshNow() }
     }
 
     private func startupMenuItem() -> NSMenuItem {
@@ -236,7 +237,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Self.showInfo(
                 "已安装状态栏采集器",
                 "请在 Claude Code 中发送任意一条消息。Claude Code 收到响应后会更新额度缓存，菜单栏随后即可显示 5 小时额度和周额度。")
-            Task { await refreshNow() }
+            Task { @MainActor in await refreshNow() }
         } catch {
             Self.showError("安装状态栏采集器失败", error.localizedDescription)
         }

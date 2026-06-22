@@ -3,7 +3,7 @@ set -euo pipefail
 
 CONFIGURATION="${1:-release}"
 APP_NAME="ClaudeQuotaTray"
-VERSION="0.1.0"
+VERSION="0.1.1"
 BUILD_DIR=".build/${CONFIGURATION}"
 APP_DIR="publish/${APP_NAME}.app"
 
